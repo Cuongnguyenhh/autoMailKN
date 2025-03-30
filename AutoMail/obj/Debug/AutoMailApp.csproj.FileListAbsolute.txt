@@ -39,3 +39,8 @@ F:\ProjecyX\AutoMail\AutoMail\obj\Debug\AutoMailApp.csproj.CoreCompileInputs.cac
 F:\ProjecyX\AutoMail\AutoMail\obj\Debug\AutoMail.A7763F97.Up2Date
 F:\ProjecyX\AutoMail\AutoMail\obj\Debug\AutoMail.exe
 F:\ProjecyX\AutoMail\AutoMail\obj\Debug\AutoMail.pdb
+F:\ProjecyX\AutoMail\AutoMail\obj\Debug\AutoMail.Form1.resources
+F:\ProjecyX\AutoMail\AutoMail\bin\Debug\AutoMail.exe.manifest
+F:\ProjecyX\AutoMail\AutoMail\bin\Debug\AutoMail.application
+F:\ProjecyX\AutoMail\AutoMail\obj\Debug\AutoMail.exe.manifest
+F:\ProjecyX\AutoMail\AutoMail\obj\Debug\AutoMail.application

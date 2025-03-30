@@ -25,7 +25,7 @@ namespace AutoMail
             InitializeComponent();
         }
 
-        // Xử lý đăng nhập
+        // Handle login
         private void btnLogin_Click(object sender, EventArgs e)
         {
             userEmail = txtEmail.Text;
@@ -33,14 +33,38 @@ namespace AutoMail
 
             if (string.IsNullOrEmpty(userEmail) || string.IsNullOrEmpty(userPassword))
             {
-                MessageBox.Show("Vui lòng nhập email và mật khẩu.");
+                MessageBox.Show("Please enter email and password.");
                 return;
             }
 
-            lblResult.Text = "Đăng nhập thành công!";
+            try
+            {
+                using (var smtpClient = new MailKit.Net.Smtp.SmtpClient())
+                {
+                    // Connect to the Gmail SMTP server
+                    smtpClient.Connect("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+
+                    // Authenticate using the user's email account
+                    smtpClient.Authenticate(userEmail, userPassword); // Use an app password if necessary
+
+                    // If the connection is successful, display a success message
+                    lblResult.Text = "Login successful!";
+                    smtpClient.Disconnect(true);  // Disconnect after successful authentication
+                }
+            }
+            catch (MailKit.Security.AuthenticationException ex)
+            {
+                // Login error due to incorrect information or blocked account
+                MessageBox.Show("Login error: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                // Catch any other errors
+                MessageBox.Show("Login error: " + ex.Message);
+            }
         }
 
-        // Đọc dữ liệu từ file Excel
+        // Read data from an Excel file
         private List<CreatorInfo> ReadExcelFile(string filePath)
         {
             List<CreatorInfo> creators = new List<CreatorInfo>();
@@ -54,14 +78,15 @@ namespace AutoMail
                     return creators;
                 }
 
-                // In ra danh sách các sheet để kiểm tra
-                for (int i = 0; i < package.Workbook.Worksheets.Count; i++)
-                {
-                    Console.WriteLine($"Sheet {i}: {package.Workbook.Worksheets[i].Name}");
-                }
+                // Lấy sheet đầu tiên
+                var worksheet = package.Workbook.Worksheets.FirstOrDefault();
 
-                // Chọn sheet đầu tiên
-                var worksheet = package.Workbook.Worksheets[0];
+                // Kiểm tra nếu worksheet hợp lệ
+                if (worksheet == null)
+                {
+                    MessageBox.Show("Không tìm thấy sheet hợp lệ.");
+                    return creators;
+                }
 
                 // Kiểm tra dimension (số hàng và cột) của worksheet
                 if (worksheet.Dimension == null)
@@ -92,13 +117,13 @@ namespace AutoMail
                         TiktokID = worksheet.Cells[row, 5].Text,      // Tiktok ID
                         Address = worksheet.Cells[row, 6].Text,       // Địa chỉ
                         Phone = worksheet.Cells[row, 7].Text,         // SDT
-                        EmailCreator = worksheet.Cells[row, 8].Text,  // Email Creator
-                        ContractStatus = worksheet.Cells[row, 9].Text, // HĐ
-                        Time = worksheet.Cells[row, 10].Text,         // Time
-                        LinkTiktok = worksheet.Cells[row, 11].Text,   // Link Tiktok
-                        Melive = worksheet.Cells[row, 12].Text,       // Melive
-                        Creator = worksheet.Cells[row, 13].Text,      // Creator
-                        MergeStatus = worksheet.Cells[row, 14].Text   // Merge status
+                        EmailCreator = worksheet.Cells[row, 1].Text,  // Email Creator
+                        ContractStatus = worksheet.Cells[row, 8].Text, // HĐ
+                        Time = worksheet.Cells[row, 9].Text,         // Time
+                        LinkTiktok = worksheet.Cells[row, 10].Text,   // Link Tiktok
+                        Melive = worksheet.Cells[row, 11].Text,       // Melive
+                        Creator = worksheet.Cells[row, 12].Text,      // Creator
+                        MergeStatus = worksheet.Cells[row, 13].Text   // Merge status
                     };
 
                     creators.Add(creator);
@@ -108,54 +133,59 @@ namespace AutoMail
             return creators;
         }
 
-
-        // Gửi email sử dụng MimeKit và MailKit
+        // Send email using MimeKit and MailKit
         private void SendEmailToCreators(List<CreatorInfo> creators)
         {
             try
             {
                 using (var smtpClient = new SmtpClient())
                 {
-                    // Kết nối đến Gmail và sử dụng STARTTLS để bảo mật kết nối
+                    // Connect to Gmail and use STARTTLS for secure connection
                     smtpClient.Connect("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
 
-                    // Đăng nhập vào tài khoản Gmail
+                    // Authenticate using the user's Gmail account
                     smtpClient.Authenticate(userEmail, userPassword);
 
                     foreach (var creator in creators)
                     {
                         var message = new MimeMessage();
-                        message.From.Add(new MailboxAddress("Melive", userEmail)); // Chỉnh lại constructor đúng cách
-                        message.To.Add(new MailboxAddress(creator.TiktokID, creator.EmailCreator)); // Đảm bảo truyền đúng tham số
+                        message.From.Add(new MailboxAddress("Melive", userEmail)); // Correct constructor usage
+                        message.To.Add(new MailboxAddress(creator.TiktokID, creator.EmailCreator)); // Ensure correct parameters
 
-                        var subject = $"[Melive MCN-Onboard] Hợp tác MCN Tiktok Shop với kênh - {creator.TiktokID}";
+                        var subject = $"[Melive MCN-Onboard] MCN Tiktok Shop partnership with channel - {creator.TiktokID}";
                         var body = $@"
 Hi team,
 
-Em gửi thông tin onboard creator/kênh: {creator.TiktokID}
+I'm sending the onboarding information for creator/channel: {creator.TiktokID}
 
-Thông tin đánh giá sơ bộ về creator/kênh:
-Creator phù hợp mảng: Mix Cat
-Hình thức hợp tác mong muốn: Hợp tác Short video, livestream.
-Vấn đề cần chú ý trong lúc làm việc: Hỗ trợ sản phẩm mẫu, voucher, quảng cáo.
+Preliminary evaluation of the creator/channel:
+----------------------------------------------------
+- Creator fits in category:           Mix Cat
+- Desired collaboration form:         Short video, livestream.
+- Issues to consider during the work: Provide sample products, vouchers, advertising.
 
-Email: {creator.EmailCreator}
-Địa chỉ: {creator.Address}
-SĐT: {creator.Phone}
+Contact Information:
+----------------------------------------------------
+- Email: {creator.EmailCreator}
+- Address: {creator.Address}
+- Phone: {creator.Phone}
 
-Thông tin hợp tác:
-Handle name: {creator.TiktokID}
-ID Tiktok: {creator.TiktokID}
-Link Tiktok: https://www.tiktok.com/@{creator.TiktokID}
-UID: {creator.UID}
-Hình thức hợp tác: Partnership
-Status: {creator.MergeStatus}
-Thời gian link net: 01 năm, ngày bắt đầu link: {DateTime.Now.ToString("dd/MM/yyyy")}
-Phần trăm chia sẻ: Melive, Creator
-Thời hạn chia sẻ: chia sẻ toàn kênh, ko chia sẻ case by case
+Partnership information:
+----------------------------------------------------
+- Handle name: {creator.TiktokID}
+- Tiktok ID: {creator.TiktokID}
+- Tiktok Link: https://www.tiktok.com/@{creator.TiktokID}
+- UID: {creator.UID}
+- Collaboration type:                 Partnership
+- Status:                            {creator.MergeStatus}
+- Link duration:                     1 year
+- Link start date:                   {DateTime.Now.ToString("dd/MM/yyyy")}
+- Share percentage:                  Melive, Creator
+- Share duration:                    Full channel share, not case by case
 
 Best regards,
 ";
+
 
                         var textPart = new TextPart("plain")
                         {
@@ -168,17 +198,17 @@ Best regards,
                         smtpClient.Send(message);
                     }
 
-                    MessageBox.Show("Email đã được gửi thành công!");
-                    smtpClient.Disconnect(true); // Ngắt kết nối sau khi gửi email
+                    MessageBox.Show("Emails sent successfully!");
+                    smtpClient.Disconnect(true); // Disconnect after sending emails
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi khi gửi email: " + ex.Message);
+                MessageBox.Show("Error sending email: " + ex.Message);
             }
         }
 
-        // Chọn file Excel và gửi email
+        // Choose an Excel file and send email
         private void btnImportExcel_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
@@ -189,14 +219,15 @@ Best regards,
                     string filePath = openFileDialog.FileName;
                     var creators = ReadExcelFile(filePath);
 
-                    // Bạn có thể kiểm tra và hiển thị kết quả đọc dữ liệu từ Excel
-                    MessageBox.Show($"Đã đọc {creators.Count} creator từ file Excel.");
+                    // You can check and display the result of reading data from the Excel file
+                    MessageBox.Show($"Read {creators.Count} creators from the Excel file.");
+
+                    SendEmailToCreators(creators);
                 }
             }
         }
 
-
-        // Lớp chứa thông tin của creator
+        // Class to store creator information
         public class CreatorInfo
         {
             public string EmailAddress { get; set; }
@@ -214,6 +245,5 @@ Best regards,
             public string Creator { get; set; }
             public string MergeStatus { get; set; }
         }
-
     }
 }
