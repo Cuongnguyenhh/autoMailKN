@@ -25,8 +25,9 @@
             this.btnLogin = new System.Windows.Forms.Button();
             this.lblResult = new System.Windows.Forms.Label();
             this.btnImportExcel = new System.Windows.Forms.Button();
+            this.UsernameLabel = new System.Windows.Forms.Label();
+            this.passwordLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
-
             // 
             // txtEmail
             // 
@@ -34,7 +35,6 @@
             this.txtEmail.Name = "txtEmail";
             this.txtEmail.Size = new System.Drawing.Size(200, 20);
             this.txtEmail.TabIndex = 0;
-
             // 
             // txtPassword
             // 
@@ -43,7 +43,6 @@
             this.txtPassword.Size = new System.Drawing.Size(200, 20);
             this.txtPassword.TabIndex = 1;
             this.txtPassword.UseSystemPasswordChar = true;
-
             // 
             // btnLogin
             // 
@@ -54,7 +53,6 @@
             this.btnLogin.Text = "Đăng nhập";
             this.btnLogin.UseVisualStyleBackColor = true;
             this.btnLogin.Click += new System.EventHandler(this.btnLogin_Click);
-
             // 
             // lblResult
             // 
@@ -63,7 +61,6 @@
             this.lblResult.Size = new System.Drawing.Size(400, 23);
             this.lblResult.TabIndex = 3;
             this.lblResult.Text = "Kết quả sẽ hiển thị ở đây";
-
             // 
             // btnImportExcel
             // 
@@ -74,11 +71,29 @@
             this.btnImportExcel.Text = "Import Excel và Gửi Email";
             this.btnImportExcel.UseVisualStyleBackColor = true;
             this.btnImportExcel.Click += new System.EventHandler(this.btnImportExcel_Click);
-
+            // 
+            // UsernameLabel
+            // 
+            this.UsernameLabel.Location = new System.Drawing.Point(153, 31);
+            this.UsernameLabel.Name = "UsernameLabel";
+            this.UsernameLabel.Size = new System.Drawing.Size(117, 19);
+            this.UsernameLabel.TabIndex = 5;
+            this.UsernameLabel.Text = "Email";
+            // 
+            // passwordLabel
+            // 
+            this.passwordLabel.AutoSize = true;
+            this.passwordLabel.Location = new System.Drawing.Point(151, 81);
+            this.passwordLabel.Name = "passwordLabel";
+            this.passwordLabel.Size = new System.Drawing.Size(81, 13);
+            this.passwordLabel.TabIndex = 6;
+            this.passwordLabel.Text = "Email Password";
             // 
             // Form1
             // 
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(493, 445);
+            this.Controls.Add(this.passwordLabel);
+            this.Controls.Add(this.UsernameLabel);
             this.Controls.Add(this.btnImportExcel);
             this.Controls.Add(this.lblResult);
             this.Controls.Add(this.btnLogin);
@@ -88,7 +103,11 @@
             this.Text = "Auto Email Sender";
             this.ResumeLayout(false);
             this.PerformLayout();
+
         }
+
+        private System.Windows.Forms.Label UsernameLabel;
+        private System.Windows.Forms.Label passwordLabel;
     }
 }
 
